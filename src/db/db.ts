@@ -12,6 +12,11 @@ pool.on('connect', () => {
   }
 });
 
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+  connectedToDatabase = false;
+});
+
 interface DatabaseError extends Error {
   code?: string;
 }
@@ -43,7 +48,6 @@ const createUserTable = async () => {
       )
     `;
     await query(queryText);
-    console.log('users table created successfully');
   } catch (error) {
     console.error('Error creating User table:', error);
   }
