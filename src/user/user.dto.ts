@@ -17,4 +17,5 @@ export class UpdateUserDTO {
   lastname?: string;
   login?: string;
   phone?: string;
+  password?: string
 }
