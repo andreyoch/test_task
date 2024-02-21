@@ -48,7 +48,6 @@ const createUserTable = async () => {
       )
     `;
     await query(queryText);
-    console.log('users table created successfully');
   } catch (error) {
     console.error('Error creating User table:', error);
   }
