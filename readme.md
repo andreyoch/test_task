@@ -10,7 +10,7 @@ This project implements a basic User operations (Create, Read, Update) API, allo
 API Endpoints
 The application defines the following RESTful endpoints:
 
-Create User: POST /
-Retrieve User by Email: GET /email/:email
-Fetch All Users: GET /
-Update User: PUT / (Existed user email required)
+- **Create User**: POST /
+- **Retrieve User by Email**: GET /email/:email
+- **Fetch All Users**: GET /
+- **Update User**: PUT / (Existed user email required)
