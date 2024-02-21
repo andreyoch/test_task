@@ -1,7 +1,7 @@
 import { query } from '../db/db';
 import { IUser } from './user.interface';
 import { CreateUserDTO, GetUserByEmailDTO, UpdateUserDTO } from './user.dto';
-
+import redis from '../cache/redis';
 export class UserRepository {
   async createUser(user: CreateUserDTO): Promise<IUser> {
     try {
@@ -14,8 +14,9 @@ export class UserRepository {
       const values = [name, lastname, email, login, password, phone];
       const result = await query<IUser & { id: number }>(queryString, values);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...rest } = result.rows[0];
-      return rest;
+      const { id, ...createdUser } = result.rows[0];
+      await redis.set(`user:${createdUser.email}`, JSON.stringify(createdUser));
+      return createdUser;
     } catch (error) {
       console.error('Error creating user:', error);
       throw new Error('Failed to create user');
@@ -25,6 +26,10 @@ export class UserRepository {
   async getUserByEmail(dto: GetUserByEmailDTO): Promise<IUser | null> {
     try {
       const { email } = dto;
+      const cachedUserData = await redis.get(`user:${email}`);
+      if (cachedUserData) {
+        return JSON.parse(cachedUserData);
+      }
       const queryString = `SELECT name, lastname, email, login, phone FROM users WHERE email = $1;`;
       const result = await query<IUser>(queryString, [email]);
       if (result.rows.length === 0) {
@@ -88,7 +93,11 @@ export class UserRepository {
         return null;
       }
 
-      return result.rows[0];
+      const updatedUser = result.rows[0];
+
+      await redis.set(`user:${updatedUser.email}`, JSON.stringify(updatedUser));
+
+      return updatedUser;
     } catch (error) {
       console.error('Error updating user:', error);
       throw new Error('Failed to update user');
